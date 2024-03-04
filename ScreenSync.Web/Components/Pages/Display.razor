@@ -1,0 +1,47 @@
+﻿@page "/display"
+@inject HubService _hubService
+@inject IJSRuntime _js
+@implements IAsyncDisposable
+
+<PageTitle>Display | ScreenSync</PageTitle>
+
+<div class="display-wrapper">
+    @if (_revealed && _hubConnection?.State == HubConnectionState.Connected)
+    {
+        <video id="display-video" class="display-video" src="-"></video>
+    }
+</div>
+
+@code {
+    private bool _revealed = Data.Revealed;
+
+    private HubConnection? _hubConnection;
+
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        _hubConnection = _hubService.MakeHubConnection(Constants.HubRoutes.DISPLAY_HUB);
+
+        _hubConnection.On(Constants.HubRoutes.UPDATE, async () =>
+        {
+            _revealed = Data.Revealed;
+            await InvokeAsync(StateHasChanged);
+            await _js.InvokeVoidAsync("play_video");
+        });
+
+        await _hubConnection.StartAsync();
+        StateHasChanged();
+        await _js.InvokeVoidAsync("play_video");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is null)
+            return;
+
+        await _hubConnection.DisposeAsync();
+    }
+}

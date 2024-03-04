@@ -1,0 +1,48 @@
+﻿@page "/"
+@inject HubService _hubService
+@implements IAsyncDisposable
+
+<PageTitle>Home | ScreenSync</PageTitle>
+
+<div class="home-wrapper">
+    @if(_hubConnection?.State != HubConnectionState.Connected)
+    {
+        <span>Loading ...</span>
+    } else 
+    {
+        <button class="home-button" @onclick=UpdateAsync>@(!Data.Revealed ? "Reveal" : "Hide") on all</button>
+    }
+</div>
+
+@code {
+    private HubConnection? _hubConnection;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(!firstRender)
+            return;
+
+        _hubConnection = _hubService.MakeHubConnection(Constants.HubRoutes.DISPLAY_HUB);
+
+        await _hubConnection.StartAsync();
+        StateHasChanged();
+    }
+
+    private async Task UpdateAsync()
+    {
+        if (_hubConnection is null)
+            return;
+
+        Data.Revealed = !Data.Revealed;
+        await _hubConnection.SendAsync(nameof(DisplayHub.Update));
+    }
+
+
+    public async ValueTask DisposeAsync()
+    {
+        if (_hubConnection is null)
+            return;
+
+        await _hubConnection.DisposeAsync();
+    }
+}
