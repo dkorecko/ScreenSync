@@ -1,0 +1,39 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches: ["main"]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      - name: Test
+        run: dotnet test --no-build --verbosity normal
+      - name: Publish
+        run: dotnet publish --configuration Release
+      - name: Deploy
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SERVER_USERNAME: ${{ secrets.SSH_USERNAME }}
+          SERVER_HOST: ${{ secrets.SSH_HOST }}
+          KEY_FILE_NAME: "private_key.ppk"
+        run: |
+          echo "$SSH_PRIVATE_KEY" > $KEY_FILE_NAME
+          chmod 600 $KEY_FILE_NAME
+          pwd
+          ls -la
+          scp -i $KEY_FILE_NAME -o StrictHostKeyChecking=no -r src/Web/bin/Release/net8.0/publish/* $SERVER_USERNAME@$SERVER_HOST:/srv/${{ secrets.SSH_USERNAME }}/www
+          ssh -i $KEY_FILE_NAME -o StrictHostKeyChecking=no $SERVER_USERNAME@$SERVER_HOST "$( cat <<'EOT'
+          sudo systemctl restart ${{ secrets.SSH_USERNAME }}
+          EOT
+          )"
