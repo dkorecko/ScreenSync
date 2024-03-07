@@ -33,7 +33,3 @@ jobs:
           pwd
           ls -la
           scp -i $KEY_FILE_NAME -o StrictHostKeyChecking=no -r ScreenSync.Web/bin/Release/net8.0/publish/* $SERVER_USERNAME@$SERVER_HOST:/srv/${{ secrets.SSH_USERNAME }}/www
-          ssh -i $KEY_FILE_NAME -o StrictHostKeyChecking=no $SERVER_USERNAME@$SERVER_HOST "$( cat <<'EOT'
-          systemctl --user restart screensync.service
-          EOT
-          )"
