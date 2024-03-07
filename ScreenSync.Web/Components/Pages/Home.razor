@@ -10,11 +10,12 @@
         <span>Loading ...</span>
     } else 
     {
-        <button class="home-button" @onclick=UpdateAsync>@(!Data.Revealed ? "Reveal" : "Hide") on all</button>
+        <button class="home-button" @onclick=UpdateAsync>@(!_revealed ? "Reveal" : "Hide") on all</button>
     }
 </div>
 
 @code {
+    private bool _revealed = Data.Revealed;
     private HubConnection? _hubConnection;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -23,6 +24,12 @@
             return;
 
         _hubConnection = _hubService.MakeHubConnection(Constants.HubRoutes.DISPLAY_HUB);
+
+        _hubConnection.On(Constants.HubRoutes.UPDATE, async () =>
+        {
+            _revealed = Data.Revealed;
+            await InvokeAsync(StateHasChanged);
+        });
 
         await _hubConnection.StartAsync();
         StateHasChanged();
@@ -33,7 +40,7 @@
         if (_hubConnection is null)
             return;
 
-        Data.Revealed = !Data.Revealed;
+        Data.Revealed = !_revealed;
         await _hubConnection.SendAsync(nameof(DisplayHub.Update));
     }
 
