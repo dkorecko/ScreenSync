@@ -32,5 +32,5 @@ jobs:
           chmod 600 $KEY_FILE_NAME
           pwd
           ls -la
-          scp -i $KEY_FILE_NAME -o StrictHostKeyChecking=no -r ScreenSync.Web/bin/Release/net8.0/publish/* $SERVER_USERNAME@$SERVER_HOST:/srv/${{ secrets.SSH_USERNAME }}/www
+          scp -i $KEY_FILE_NAME -o StrictHostKeyChecking=no -r ScreenSync.Web/bin/Debug/net8.0/publish/* $SERVER_USERNAME@$SERVER_HOST:/srv/${{ secrets.SSH_USERNAME }}/www
           ssh -i $KEY_FILE_NAME -o StrictHostKeyChecking=no $SERVER_USERNAME@$SERVER_HOST "sudo /usr/bin/systemctl restart screensync"
