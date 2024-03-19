@@ -8,7 +8,7 @@
 <div class="display-wrapper">
     @if (_revealed && _hubConnection?.State == HubConnectionState.Connected)
     {
-        <video id="display-video" class="display-video" src="https://img.tpx.cz/uploads/15da7fb8a7961ae59000c8584d8cd738.mp4"></video>
+        <video id="display-video" class="display-video" src="https://img.tpx.cz/uploads/15da7fb8a7961ae59000c8584d8cd738.mp4" loop></video>
     } else if(_hubConnection?.State != HubConnectionState.Connected) {
         <h4 style="color: white;">@_hubConnection?.State.ToString()</h4>
     }
