@@ -9,6 +9,8 @@
     @if (_revealed && _hubConnection?.State == HubConnectionState.Connected)
     {
         <video id="display-video" class="display-video" src="https://img.tpx.cz/uploads/15da7fb8a7961ae59000c8584d8cd738.mp4"></video>
+    } else if(_hubConnection?.State != HubConnectionState.Connected) {
+        <p>@_hubConnection?.State.ToString()</p>
     }
 </div>
 
